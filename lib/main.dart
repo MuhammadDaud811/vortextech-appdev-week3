@@ -10,160 +10,166 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vortex Tech - Login Screen',
+      title: 'Vortex Tech - todo list',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
       ),
-      home: const LoginScreen(),
+      home: const TodoScreen(),
     );
   }
 }
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class Task {
+  final String title;
+  bool isDone;
+
+  Task({required this.title, this.isDone = false});
+}
+
+class TodoScreen extends StatefulWidget {
+  const TodoScreen({super.key});
+
+  @override
+  State<TodoScreen> createState() => _TodoScreenState();
+}
+
+class _TodoScreenState extends State<TodoScreen> {
+  final List<Task> tasks = [];
+
+  final TextEditingController _controller = TextEditingController();
+
+  void _addtext() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      tasks.add(Task(title: text));
+    });
+    _controller.clear();
+  }
+
+  void _toggleComplete(int index) {
+    setState(() {
+      tasks[index].isDone = !tasks[index].isDone;
+    });
+  }
+
+  void deleteTask(int index) {
+    setState(() {
+      tasks.removeAt(index);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        title: const Text('Todo List'),
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+      ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo / Icon
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    shape: BoxShape.circle,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Add a new task...',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none
+                        ),
+                      ),
+                      onSubmitted: (_) => _addtext(),
+                    ),
                   ),
-                  child: Icon(
-                    Icons.lock_outline,
-                    size: 60,
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: _addtext,
+                    icon: const Icon(Icons.add_circle),
                     color: Colors.blue.shade700,
+                    iconSize: 36,
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Welcome Text
-                const Text(
-                  'Welcome Back',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  'Login to continue using the app',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Email Field
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                ],
+              ),
+            ),
+            Expanded(
+              child: tasks.isEmpty
+                  ? const Center(
+                child: Text(
+                  'No tasks yet, Please Add Tasks',
+                  style: TextStyle(color: Colors.grey),
+              ),
+              )
+              : ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                itemCount: tasks.length,
+                itemBuilder: (context, index) {
+                  final task = tasks[index];
+                  return Dismissible(
+                    key: ValueKey(task.hashCode.toString()),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (_) => deleteTask(index),
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade400,
+                        borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Password Field
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Enter your password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text('Forgot Password?'),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Login Button
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Sign up row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Don't have an account? ",
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          color: Colors.blue.shade700,
-                          fontWeight: FontWeight.bold,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: CheckboxListTile(
+                        value: task.isDone,
+                        onChanged: (_) => _toggleComplete(index),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        title: Text(
+                          task.title,
+                          style: TextStyle(
+                            decoration: task.isDone
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            color: task.isDone
+                                ? Colors.black38
+                                : Colors.black87,
+                          ),
+                        ),
+                        secondary: IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          color: Colors.grey.shade500,
+                          onPressed: () => deleteTask(index),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  );
+
+                },
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
